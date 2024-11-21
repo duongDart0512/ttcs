@@ -1,8 +1,27 @@
 <?php
 require('includes/header.php');
-//function anhdaidien($thumbnailPath,$height)
-    //<img src = " <?php echo htmlspecialchars($thumbnailPath);";height = '$height'/>
-//<?php } 
+require('../ketnoi/connect.php');
+
+// Xác định trang hiện tại
+$limit = 20; // Số người dùng mỗi trang
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Lấy số trang từ URL, mặc định là 1
+if ($page < 1) $page = 1; // Đảm bảo số trang không âm
+
+// Tính OFFSET
+$offset = ($page - 1) * $limit;
+
+// Đếm tổng số người dùng
+$sql_count = "SELECT COUNT(*) as total FROM user";
+$result_count = mysqli_query($conn, $sql_count);
+$row_count = mysqli_fetch_assoc($result_count);
+$total_users = $row_count['total']; // Tổng số người dùng
+$total_pages = ceil($total_users / $limit); // Tổng số trang
+$sql_str = "select user.id as uid,
+user.ten as uname,
+user.taikhoan as uaccount
+from user order by uid
+LIMIT $limit OFFSET $offset";
+$result = mysqli_query($conn,$sql_str);
 ?>
 <div>
 <div class="card shadow mb-4">
@@ -29,16 +48,9 @@ require('includes/header.php');
                                         </tr>
                                     </tfoot>
                                     <tbody>
-                                    <?php require('../ketnoi/connect.php');
-                                        $sql_str = "select user.id as uid,
-                                        user.ten as uname,
-                                        user.taikhoan as uaccount
-                                        from user order by uid";
-                                        $result = mysqli_query($conn,$sql_str);
-                                        while($row = mysqli_fetch_assoc($result)){
-                                            
+                                    <?php 
+                                        while($row = mysqli_fetch_assoc($result)){ 
                                             ?>
-       
                                         <tr>
                                             <td><?=$row['uid']?></td>
                                             <td><?=$row['uname']?></td>
@@ -55,8 +67,26 @@ require('includes/header.php');
                             </div>
                         </div>
                     </div>
+    <nav aria-label="..." style = "algin-items: center">
+    <ul class="pagination">
+        <?php if ($page > 1): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?= $page - 1 ?>">Previous</a>
+            </li>
+        <?php endif; ?>
+        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+            </li>
+        <?php endfor; ?>
+        <?php if ($page < $total_pages): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?= $page + 1 ?>">Next</a>
+            </li>
+        <?php endif; ?>
+    </ul>
+    </nav>
 </div>
-
 <?php
 require('includes/footer.php')
 ?>

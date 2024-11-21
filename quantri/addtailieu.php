@@ -114,8 +114,8 @@ if (isset($_FILES['pdf_file'])) {
     }
     error_log("Đã tạo thumbnail thành công");
 
-    $sql_str = "INSERT INTO tailieu (id, tentailieu, filepath, tenonhoc, tailieu, anhdaidien,     userid, namhocid) 
-    VALUES (NULL, '$nametext', '$filePath', '$nameproject', '$filePath', '$thumbnailPath', NULL, '$namhoc_id');";  
+    $sql_str = "INSERT INTO tailieu (id, tentailieu, filepath, tenonhoc, tailieu, anhdaidien, uploaddate,userid, namhocid) 
+    VALUES (NULL, '$nametext', '$filePath', '$nameproject', '$filePath', '$thumbnailPath',CURRENT_DATE, NULL, '$namhoc_id');";  
     // Thực thi câu lệnh 
     
     mysqli_query($conn, $sql_str);  
