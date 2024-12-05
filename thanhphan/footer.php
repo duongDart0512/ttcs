@@ -21,9 +21,9 @@
               <li class="menu-item mb-2">
                 <a href="tailieu.php" class="footer-link">Tài liệu môn học</a>
               </li>
-              <li class="menu-item mb-2">
+              <!-- <li class="menu-item mb-2">
                 <a href="loginform.php" class="footer-link">Đăng nhập</a>
-              </li>
+              </li> -->
               <li class="menu-item mb-2">
                 <a href="contact.php" class="footer-link">Liên hệ</a>
               </li>

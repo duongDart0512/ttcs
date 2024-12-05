@@ -7,28 +7,78 @@
 	<link href="https://fonts.googleapis.com/css2?family=Moderustic:wght@300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 </head>
 <body>
+<?php
+session_start();
+$errorMsg = "";
+$username = "";
+$email = "";
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["signup"])) {
+    // Lấy dữ liệu từ form
+    $username = trim($_POST["username"]);
+    $email = trim($_POST["email"]);
+    $password = $_POST["password"];
+    $cfpassword = $_POST["confirmpassword"];
+
+    // Kiểm tra dữ liệu
+    if ($password !== $cfpassword) {
+        $errorMsg = "Mật khẩu không trùng khớp!";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errorMsg = "Email không hợp lệ!";
+    } else {
+        require_once("ketnoi/connect.php");
+
+        // Kiểm tra email hoặc tên người dùng đã tồn tại
+        $stmt = $conn->prepare("SELECT * FROM user WHERE taikhoan = ? OR ten = ?");
+        $stmt->bind_param("ss", $email, $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $errorMsg = "Email hoặc Tên người dùng đã tồn tại!";
+        } else {
+            // Mã hóa mật khẩu và thêm vào CSDL
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $conn->prepare("INSERT INTO user VALUE (NULL, ?, ?, ?, 'images/avatar.svg')");
+            $stmt->bind_param("sss", $username, $email, $hashedPassword);
+            if ($stmt->execute()) {
+                //  echo "Đăng ký thành công! <a href='loginform.php'>Đăng nhập</a>";
+                // exit;
+            // } else {
+            //     $errorMsg = "Đăng ký thất bại: " . $stmt->error;
+            header("Location: loginform.php");
+            }
+        }
+    }
+}
+?>
+
     <div class="container">
-        <form action="">
+        <form action="" method = "Post">
             <h1>Sign Up</h1>
             <div class="formcontrol" >
-                <input id="username" type="text" placeholder="Username">
+                <input id="username" type="text" placeholder="Username" name = "username"
+                value="<?php echo htmlspecialchars($username); ?>" required>
                 <small></small>
                 <span></span>
             </div>
             <div class="formcontrol ">
-                <input id= "Email" type="text" placeholder="Email">
+                <input id= "Email" type="text" placeholder="Email" name  = "email"
+                value="<?php echo htmlspecialchars($email); ?>" required>
                 <small></small>
                 <span></span>
             </div>
             <div class="formcontrol ">
-                <input id="Password" type="text" placeholder="Password">
+                <input id="Password" type="text" placeholder="Password" name = "password" required>
                 <small></small>
                 <span></span>
             </div>
             <div class="formcontrol">
-                <input id="Confirm" type="text" placeholder="Confirm Password">
+                <input id="Confirm" type="text" placeholder="Confirm Password" name = "confirmpassword" required>
                 <small></small>
                 <span></span>
+            </div>
+            <div class="error">
+            <?php echo !empty($errorMsg) ? htmlspecialchars($errorMsg) : ''; ?>
             </div>
             <button type="submit" class="btnLogin" name = "signup">Sign up</button>
             <div class="signuplink">
@@ -56,6 +106,10 @@ body{
     justify-content: center;
     align-items: center;
     font-family: 'Poppins';
+}
+.error{
+    font-size :12px;
+    color : var(--error-color-);
 }
 .container{
     width: 400px;
@@ -132,87 +186,6 @@ body{
 
 </style>
 <script >
-	var username = document.querySelector('#username')//id thi dung # nhe em
-var Email = document.querySelector('#Email')
-var Password = document.querySelector('#Password')
-var Comfirm = document.querySelector('#Confirm')
-var form = document.querySelector('form')
 
-function showError(input,massage){
-    let parent = input.parentElement
-    let small = parent.querySelector('small')
-    parent.classList.add('error')
-    small.innerText = massage
-}
-
-function showSuccess(input,massage){
-    let parent = input.parentElement
-    let small = parent.querySelector('small')
-    parent.classList.remove('error')
-    small.innerText = ''
-}
-
-function checkEmptyError(listInput){
-    let isEmptyError = false
-    listInput.forEach(input => {
-    input.value = input.value.trim()
-
-    if(input.value ==''){
-        isEmptyError = true
-            showError(input,'Khong duoc de trong')
-        }else{
-            showSuccess(input)
-        }
-    });
-    return isEmptyError
-}
-
-function checkEmail(input){
-    const regexEmail =
-  /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-  input.value = input.value.trim()
-  let isEmailError = !regexEmail.test(input.value)
-  if(regexEmail.test(input.value)){
-    showSuccess(input,'')
-  }else{
-    showError(input,'Email không hợp lệ')
-  }
-  return isEmailError
- }
- function checkLenght(input,min,max){
-    input.value = input.value.trim()
-    if(input.value.lenght < min){
-        showError(input,'Không đảm bảo độ dài')
-        return true
-    }else if(input.value > max){
-        showError(input,'Vuot qua ki tu cho phep')
-        return true
-    }
-
-    return false
- }
- function checkMatch(inputPassword,confirminputPassword){
-    if(inputPassword.value != confirminputPassword.value){
-        showError(confirminputPassword,'Mật khẩu không trùng hợp')
-        return true
-    }
-    return false
- }
-
-form.addEventListener('submit', function(e){
-    e.preventDefault()
-
-    let isEmptyError = checkEmptyError([username,Email,Password,Comfirm])
-    let isEmailError=checkEmail(Email)
-    let isUsernameError = checkLenght(username,3,15)
-    let isPasswordError = checkLenght(Password,8,23)
-    let ischeckMatch = checkMatch(Password,Comfirm)
-
-})
-if(isEmptyError||isEmailError||isUsernameError||isPasswordError||ischeckMatch){
-    // do nothing
-}else{
-    
-}
 </script>
 </html>

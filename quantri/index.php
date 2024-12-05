@@ -15,7 +15,7 @@ require('../ketnoi/connect.php');
             <!-- Earnings (Monthly) Card Example -->
             <div class="col-xl-3 col-md-6 ml-3">
                 <div class="card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
+                    <a class="card-body" style = "text-decoration: none" href = "listtailieu.php">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
@@ -33,7 +33,7 @@ require('../ketnoi/connect.php');
                             <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
 
@@ -58,7 +58,7 @@ require('../ketnoi/connect.php');
             <!-- Earnings (Monthly) Card Example -->
             <div class="col-xl-3 col-md-6 ml-3">
                 <div class="card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
+                    <a class="card-body" style = "text-decoration: none" href = "listnguoidung.php">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
                                 <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
@@ -79,7 +79,7 @@ require('../ketnoi/connect.php');
                             <i class='bx bxs-user-account' style = "font-size: 40px ; color: gray; opacity: 0.5"></i>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </div>

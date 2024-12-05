@@ -7,26 +7,59 @@
 	<link href="https://fonts.googleapis.com/css2?family=Moderustic:wght@300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 </head>
 <body>
+<?php
+session_start();
+require_once("ketnoi/connect.php");
+$errorMsg = "";
+$email = "";
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["btnlogin"])) {
+    //lay du lieu tu form
+    $email = trim($_POST["username"]);
+    $password = $_POST["password"];
+    $stmt = $conn->prepare("SELECT * FROM user WHERE taikhoan = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if (mysqli_num_rows($result) > 0) {
+        $row = mysqli_fetch_assoc($result);
+        if (password_verify($password, $row['matkhau'])) {
+            $_SESSION['userid'] = $row['userid'];
+            header("Location: index.php");
+            exit;
+        }
+        else {
+            $errorMsg = "Sai mật khẩu!";
+        }
+    } else {
+        $errorMsg = "Không tìm thấy thông tin tài khoản trong hệ thống";
+    }
+ }
+?>
     <div class="container">
-        <form action="">
+        <form action="" method = "POST">
             <h1>Login</h1>
             <div class="formcontrol" >
-                <input id="username" type="text" placeholder="Username">
+                <input id="username" type="text" placeholder="Username" name = "username"
+                value="<?php echo htmlspecialchars($email); ?>" required>
                 <small></small>
                 <span></span>
             </div>
             <div class="formcontrol ">
-                <input id="Password" type="text" placeholder="Password">
+                <input id="Password" type="password" placeholder="Password" name = "password" required>
                 <small></small>
                 <span></span>
             </div>
-            <button type="submit" class="btnLogin" name = "login">Login</button>
+            <button type="submit" class="btnLogin" name = "btnlogin">Login</button>
+            <div class="error">
+            <?php echo !empty($errorMsg) ? htmlspecialchars($errorMsg) : ''; ?>
+            </div>
             <div class="signuplink">
                 Not a member?  <a href="register.php">Sign Up</a>
             </div>
         </form>
     </div>
 </body>
+
 <style>
 
 :root{
@@ -119,90 +152,93 @@ body{
     text-decoration: none;
     cursor: pointer;
 }
-
+.error{
+    font-size :12px;
+    color : var(--error-color-);
+}
 </style>
 <script >
-	var username = document.querySelector('#username')//id thi dung # nhe em
-var Email = document.querySelector('#Email')
-var Password = document.querySelector('#Password')
-var Comfirm = document.querySelector('#Confirm')
-var form = document.querySelector('form')
+// 	var username = document.querySelector('#username')
+// var Email = document.querySelector('#Email')
+// var Password = document.querySelector('#Password')
+// var Comfirm = document.querySelector('#Confirm')
+// var form = document.querySelector('form')
 
-function showError(input,massage){
-    let parent = input.parentElement
-    let small = parent.querySelector('small')
-    parent.classList.add('error')
-    small.innerText = massage
-}
+// function showError(input,massage){
+//     let parent = input.parentElement
+//     let small = parent.querySelector('small')
+//     parent.classList.add('error')
+//     small.innerText = massage
+// }
 
-function showSuccess(input,massage){
-    let parent = input.parentElement
-    let small = parent.querySelector('small')
-    parent.classList.remove('error')
-    small.innerText = ''
-}
+// function showSuccess(input,massage){
+//     let parent = input.parentElement
+//     let small = parent.querySelector('small')
+//     parent.classList.remove('error')
+//     small.innerText = ''
+// }
 
-function checkEmptyError(listInput){
-    let isEmptyError = false
-    listInput.forEach(input => {
-    input.value = input.value.trim()
+// function checkEmptyError(listInput){
+//     let isEmptyError = false
+//     listInput.forEach(input => {
+//     input.value = input.value.trim()
 
-    if(input.value ==''){
-        isEmptyError = true
-            showError(input,'Khong duoc de trong')
-        }else{
-            showSuccess(input)
-        }
-    });
-    return isEmptyError
-}
+//     if(input.value ==''){
+//         isEmptyError = true
+//             showError(input,'Khong duoc de trong')
+//         }else{
+//             showSuccess(input)
+//         }
+//     });
+//     return isEmptyError
+// }
 
-function checkEmail(input){
-    const regexEmail =
-  /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-  input.value = input.value.trim()
-  let isEmailError = !regexEmail.test(input.value)
-  if(regexEmail.test(input.value)){
-    showSuccess(input,'')
-  }else{
-    showError(input,'Email không hợp lệ')
-  }
-  return isEmailError
- }
- function checkLenght(input,min,max){
-    input.value = input.value.trim()
-    if(input.value.lenght < min){
-        showError(input,'Không đảm bảo độ dài')
-        return true
-    }else if(input.value > max){
-        showError(input,'Vuot qua ki tu cho phep')
-        return true
-    }
+// function checkEmail(input){
+//     const regexEmail =
+//   /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+//   input.value = input.value.trim()
+//   let isEmailError = !regexEmail.test(input.value)
+//   if(regexEmail.test(input.value)){
+//     showSuccess(input,'')
+//   }else{
+//     showError(input,'Email không hợp lệ')
+//   }
+//   return isEmailError
+//  }
+//  function checkLenght(input,min,max){
+//     input.value = input.value.trim()
+//     if(input.value.lenght < min){
+//         showError(input,'Không đảm bảo độ dài')
+//         return true
+//     }else if(input.value > max){
+//         showError(input,'Vuot qua ki tu cho phep')
+//         return true
+//     }
 
-    return false
- }
- function checkMatch(inputPassword,confirminputPassword){
-    if(inputPassword.value != confirminputPassword.value){
-        showError(confirminputPassword,'Mật khẩu không trùng hợp')
-        return true
-    }
-    return false
- }
+//     return false
+//  }
+//  function checkMatch(inputPassword,confirminputPassword){
+//     if(inputPassword.value != confirminputPassword.value){
+//         showError(confirminputPassword,'Mật khẩu không trùng hợp')
+//         return true
+//     }
+//     return false
+//  }
 
-form.addEventListener('submit', function(e){
-    e.preventDefault()
+// form.addEventListener('submit', function(e){
+//     e.preventDefault()
 
-    let isEmptyError = checkEmptyError([username,Email,Password,Comfirm])
-    let isEmailError=checkEmail(Email)
-    let isUsernameError = checkLenght(username,3,15)
-    let isPasswordError = checkLenght(Password,8,23)
-    let ischeckMatch = checkMatch(Password,Comfirm)
+//     let isEmptyError = checkEmptyError([username,Email,Password,Comfirm])
+//     let isEmailError=checkEmail(Email)
+//     let isUsernameError = checkLenght(username,3,15)
+//     let isPasswordError = checkLenght(Password,8,23)
+//     let ischeckMatch = checkMatch(Password,Comfirm)
 
-})
-if(isEmptyError||isEmailError||isUsernameError||isPasswordError||ischeckMatch){
-    // do nothing
-}else{
+// })
+// if(isEmptyError||isEmailError||isUsernameError||isPasswordError||ischeckMatch){
+//     // do nothing
+// }else{
     
-}
+// }
 </script>
 </html>

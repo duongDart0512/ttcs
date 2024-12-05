@@ -1,4 +1,11 @@
-
+<?php session_start();
+require('ketnoi/connect.php');
+if (!isset($_SESSION['userid'])) {
+  // Chuyển hướng đến trang đăng nhập
+  header("Location: loginform.php");
+  exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -47,8 +54,8 @@
           Search
         </h4>
         <div class="search-bar border rounded-2 border-dark-subtle">
-          <form id="search-form" class="text-center d-flex align-items-center" action="" method="">
-            <input type="text" class="form-control border-0 bg-transparent" placeholder="Search Here" />
+          <form id="search-form" class="text-center d-flex align-items-center" action="timkiem.php" method="get">
+            <input type="text" class="form-control border-0 bg-transparent" placeholder="Search Here" name = "keyword"/>
             <button method = "post"class="fs-4 me-3" style="background: none; border: none;">
               <i class="fa-solid fa-magnifying-glass"></i>
             </button>
@@ -93,7 +100,7 @@
               <a class="nav-link mx-2 dropdown-toggle align-items-center" role="button" id="pages"
                 data-bs-toggle="dropdown" aria-expanded="false">Năm học</a>
               <ul class="dropdown-menu" aria-labelledby="pages">
-              <?php require('ketnoi/connect.php');
+              <?php 
                             $sql_str = "select * from namhoc order by ten";
                             $result = mysqli_query($conn,$sql_str);
                             while($row = mysqli_fetch_assoc($result)){ 
@@ -107,28 +114,6 @@
               <a href="meetingroom.php" class="nav-link ">Meeting Room</a>
             </li>
 
-            <!-- <li class="nav-item dropdown">
-              <a class="nav-link mx-2 dropdown-toggle align-items-center" role="button" id="blog"
-                data-bs-toggle="dropdown" aria-expanded="false">blog</a>
-              <ul class="dropdown-menu" aria-labelledby="blog">
-                <li><a href="blog.html" class="dropdown-item">blog<span
-                      class="badge bg-secondary text-white ms-2">PRO</span></a></li>
-                <li><a href="single-post.html" class="dropdown-item">single post<span
-                      class="badge bg-secondary text-white ms-2">PRO</span></a></li>
-              </ul>
-            </li>
-
-            <li class="nav-item dropdown">
-              <a class="nav-link mx-2 dropdown-toggle align-items-center" role="button" id="shop"
-                data-bs-toggle="dropdown" aria-expanded="false">shop</a>
-              <ul class="dropdown-menu" aria-labelledby="shop">
-                <li><a href="shop.html" class="dropdown-item">Shop<span
-                      class="badge bg-secondary text-white ms-2">PRO</span></a></li>
-                <li><a href="single-product.html" class="dropdown-item">Single Product<span
-                      class="badge bg-secondary text-white ms-2">PRO</span></a></li>
-              </ul>
-            </li> -->
-
             <li class="nav-item">
               <a href="contact.php" class="nav-link mx-2">contact</a>
             </li>
@@ -137,12 +122,43 @@
                 class="nav-link mx-2 text-decoration-underline" target="_blank">GET PRO</a>
             </li>
           </ul> -->
+            <?php 
+            
+            function getUserInfo($conn, $user_id) {
+              $stmt = $conn->prepare("SELECT ten, taikhoan, anhdaidien FROM user WHERE userid = ?");
+              $stmt->bind_param("i", $user_id);
+              $stmt->execute();
+              $result = $stmt->get_result();
+              return $result->fetch_assoc();
+          }?>
+          <?php
+          //if(!isset($_SESSION['userid'])):
+          ?>
+            <!-- <li class="nav-item">
+              <a href="loginform.php" class="nav-link ">Đăng nhập</a>
+            </li>
 
-          <div class="d-none d-lg-flex align-items-center">
-            <ul class="d-flex  align-items-center list-unstyled m-0">
-              <li>
-                <a href="account.php" class="ms-3">
-                  <i class="fa-sharp-duotone fa-solid fa-user"></i> </a>
+            <li class="nav-item">
+              <a href="register.php" class="nav-link mx-2">Đăng ký</a>
+            </li> -->
+          <?php 
+          $userInfo = getUserInfo($conn,$_SESSION['userid'])?>
+          <!-- <div class="d-none d-lg-flex align-items-center">
+            <ul class="d-flex  align-items-center list-unstyled m-0"> -->
+              <li class = "nav-item dropdown">
+              <a class="nav-link mx-2 align-items-center" role="button" id="pages"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <img src="<?php echo htmlspecialchars($userInfo['anhdaidien']); ?>" 
+              alt="User Avatar" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;"> </a>
+                  <ul class = "dropdown-menu" aria-labelledby="pages">
+                    <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
+                      <a href = "account.php">Thông tin tài khoản</a></li>
+                    <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
+                      <a href = "upload.php">Tải tài liệu lên</a>
+                    </li>
+                    <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
+                      <a href = "logout.php">Đăng xuất</a></li>
+                  </ul>
               </li>
               <li>
                 <a href="wishlist.php" class="ms-3">
@@ -158,14 +174,15 @@
                 </a>
               </li>
 
-            </ul>
-          </div>
+            <!-- </ul>
+          </div> -->
+          <?php //endif;?>
 
         </div>
       </div>
 
     </div>
-    <div class="container-fluid d-lg-none">
+    <!-- <div class="container-fluid d-lg-none">
       <div class="d-flex  align-items-end mt-3">
         <ul class="d-flex  align-items-center list-unstyled m-0">
           <li>
@@ -186,5 +203,5 @@
 
         </ul>
       </div>
-    </div>
+    </div> -->
   </nav>

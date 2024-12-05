@@ -3,7 +3,7 @@ require('includes/header.php');
 require('../ketnoi/connect.php');
 
 // Xác định trang hiện tại
-$limit = 15; // Số người dùng mỗi trang
+$limit = 10; // Số người dùng mỗi trang
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Lấy số trang từ URL, mặc định là 1
 if ($page < 1) $page = 1; // Đảm bảo số trang không âm
 
@@ -27,7 +27,7 @@ LIMIT $limit OFFSET $offset";
 $result = mysqli_query($conn,$sql_str);
 ?>
 
-<div>
+
 <div class="card shadow mb-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">Danh sách tài liệu</h6>

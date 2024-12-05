@@ -57,6 +57,7 @@ function generateThumbnailFromPDF($pdfPath, $imagePath) {
 
         $imagick->setImageFormat('jpg');
         error_log("Đã set format");
+       
 
         if (!$imagick->writeImage($imagePath)) {
             error_log("Không thể lưu file ảnh");
