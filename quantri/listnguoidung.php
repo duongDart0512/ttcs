@@ -16,7 +16,7 @@ $result_count = mysqli_query($conn, $sql_count);
 $row_count = mysqli_fetch_assoc($result_count);
 $total_users = $row_count['total']; // Tổng số người dùng
 $total_pages = ceil($total_users / $limit); // Tổng số trang
-$sql_str = "select user.id as uid,
+$sql_str = "select user.userid as uid,
 user.ten as uname,
 user.taikhoan as uaccount
 from user order by uid
