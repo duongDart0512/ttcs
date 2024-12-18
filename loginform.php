@@ -49,6 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["btnlogin"])) {
                 <small></small>
                 <span></span>
             </div>
+            <a href="forgotpassword.php" style = "font-size : 15px;
+            text-decoration: none; margin-top: 20px; margin-left:200px;">Forgot password ?</a>
             <button type="submit" class="btnLogin" name = "btnlogin">Login</button>
             <div class="error">
             <?php echo !empty($errorMsg) ? htmlspecialchars($errorMsg) : ''; ?>
@@ -78,7 +80,7 @@ body{
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Poppins';
+    /* font-family: 'Poppins'; */
 }
 .container{
     width: 400px;
@@ -153,6 +155,8 @@ body{
     cursor: pointer;
 }
 .error{
+    margin-top: 10px;
+    margin-bottom: 10px;
     font-size :12px;
     color : var(--error-color-);
 }

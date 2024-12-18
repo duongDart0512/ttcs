@@ -1,10 +1,17 @@
 <?php session_start();
 require('ketnoi/connect.php');
-if (!isset($_SESSION['userid'])) {
-  // Chuyển hướng đến trang đăng nhập
+if (!isset($_SESSION['userid']) && 
+    !in_array(basename($_SERVER['PHP_SELF']), ['loginform.php', 'register.php'])) {
   header("Location: loginform.php");
   exit;
-}
+    }
+    function getUserInfo($conn, $user_id) {
+      $stmt = $conn->prepare("SELECT ten, taikhoan, anhdaidien FROM user WHERE userid = ?");
+      $stmt->bind_param("i", $user_id);
+      $stmt->execute();
+      $result = $stmt->get_result();
+      return $result->fetch_assoc();
+  }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -124,13 +131,7 @@ if (!isset($_SESSION['userid'])) {
           </ul> -->
             <?php 
             
-            function getUserInfo($conn, $user_id) {
-              $stmt = $conn->prepare("SELECT ten, taikhoan, anhdaidien FROM user WHERE userid = ?");
-              $stmt->bind_param("i", $user_id);
-              $stmt->execute();
-              $result = $stmt->get_result();
-              return $result->fetch_assoc();
-          }?>
+            ?>
           <?php
           //if(!isset($_SESSION['userid'])):
           ?>
@@ -141,7 +142,7 @@ if (!isset($_SESSION['userid'])) {
             <li class="nav-item">
               <a href="register.php" class="nav-link mx-2">Đăng ký</a>
             </li> -->
-          <?php 
+          <?php if (isset($_SESSION['userid'])):
           $userInfo = getUserInfo($conn,$_SESSION['userid'])?>
           <!-- <div class="d-none d-lg-flex align-items-center">
             <ul class="d-flex  align-items-center list-unstyled m-0"> -->
@@ -155,6 +156,9 @@ if (!isset($_SESSION['userid'])) {
                       <a href = "account.php">Thông tin tài khoản</a></li>
                     <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
                       <a href = "upload.php">Tải tài liệu lên</a>
+                    </li>
+                    <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
+                      <a href = "changepassword.php">Đổi mật khẩu</a>
                     </li>
                     <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
                       <a href = "logout.php">Đăng xuất</a></li>
@@ -173,7 +177,15 @@ if (!isset($_SESSION['userid'])) {
                   </svg> </a>
                 </a>
               </li>
+              <?php else: ?>
+            <li class="nav-item">
+              <a href="loginform.php" class="nav-link">Đăng nhập</a>
+            </li>
 
+            <li class="nav-item">
+              <a href="register.php" class="nav-link mx-2">Đăng ký</a>
+            </li>
+            <?php endif; ?>
             <!-- </ul>
           </div> -->
           <?php //endif;?>

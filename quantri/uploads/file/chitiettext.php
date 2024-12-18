@@ -23,185 +23,17 @@ $is_favorite = $favorite_result->num_rows > 0;
     </div>
     <div class="containertext" style = "display: flex; margin-top:20px; max-width:100%; margin-bottom: 70px" >
         
-        <div class="document-content" style = "margin-left :15px; width: 65% ;height: 600px;">
+        <div class="document-content" style = "margin-left :15px; width: 55% ;height: 600px">
             <h4><?=$row['tentailieu']?></h4>
             <iframe class="pdffile" src="<?php echo htmlspecialchars($filePath); ?>" frameborder="0" width = "100%" height = "100%" ></iframe>
             <button id="favoriteBtn" class="<?= $is_favorite ? 'favorited' : '' ?>">
             <?= $is_favorite ? 'Đã Yêu Thích' : 'Yêu Thích' ?>
         </button>
-        </div>
-        <div class="chatbot">
-            <header>
-                <h2>Chat bot</h2>
-            </header>
-            <ul class = "chatbox">
-                <li class = "chat incoming">
-                    <span class="material-symbols-outlined">
-                        smart_toy
-                        </span>
-                    <p>xin chào  <br>Tôi có thể giúp gì cho bạn? </p>
-                </li>
-            </ul>
-            <div class="chat-input">
-                <textarea placeholder="Nhập câu hỏi..." required></textarea>
-                <span id="send-btn" class="material-symbols-outlined">send</span>
-            </div>
-        </div>  
-    </div>
-<style>
-.chatbot{
-    position: relative;
-    background: white;
-    height: 600px;
-    width: 420px;
-    pointer-events: none;
-    /* overflow: hidden; */
-    bottom: -36px;
-    /* transform-origin: bottom right; */
-    border-radius: 0px;
-    box-shadow: 0 0 128px rgba(0,0,0,0.1), 0 32px 64px -48px rgba(0,0,0,0.5);
-    margin-left: 10px;
-}
-.chatbot header{
-    background: #4CC082 ;
-    padding: 16px 0 ;
-    text-align: center;
-    border-radius: 15px 15px 0 0 ;
-}
-.chatbot header h2{
-    color: #fff;
-    font-size: 1.4rem;
-}
-.chatbot .chatbox{
-    height: 80%;
-    overflow-y: auto;
-    padding: 15px 20px 100px;
-} 
- .chatbot .chat{
-    display: flex;
-} 
-.chatbot .incoming span{
-    height: 25px;
-    width: 25px;
-    color: #fff;
-    align-items: flex-end;
-    background: #4CC082;
-    text-align: center;
-    line-height: 25px;
-    border-radius: 4px;
-    margin: 0 10px 7px 0;
-}
-.chatbot .outcoming{
-    justify-content: flex-end;
-    margin: 10px 0;
-}
-.chatbot .chat p{
-    color: #fff;
-    padding: 12px 16px;
-    border-radius: 10px 10px 0 10px;
-    white-space: pre-wrap;
-    background: #4CC082;
-    font-size: 14px;
-}
-.chatbot .incoming p{
- color: #000;
- background: #f2f2f2;
- border-radius: 0 10px 10px 10px;
-}
-.chatbot .chat-input{
-    position: absolute;
-    bottom: 0;
-    gap: 5px;
-    width:100% ;
-    display: flex;
-    background: #fff;
-    padding: 5px 20px;
-    border-top: 1px solid #ccc;
-}
-.chat-input textarea{
-    border: none;
-    outline: none;
-    font-size: 16px;
-    width: 100%;    
-    resize: none;
-    padding: 15px 16px 15px 0;
-    pointer-events: auto;
-}
-.chat-input span{
-    align-self:flex-end;
-    height: 30px;
-    line-height: px;
-    color: #724ae8;
-    font-size: 1.35rem;
-    cursor: pointer;
-    margin-bottom: 30px;
-    visibility: hidden;
-}
-.chat-input textarea:valid ~ span{
-    visibility: visible;
-}
-
-/* .show-chatbot .chatbot{
-    transform: scale(1);
-    opacity: 1;
-    pointer-events: auto;
-}
-.chatbot-toggler{
-    position: fixed;
-    right: 40px;
-    bottom: 30px;
-    height: 50px;
-    width: 50px;
-    color: #fff;
-    border: none;
-    outline: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    background: #724ae8;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-}
-.chatbot-toggler span{
-    position: absolute;
-}
-.show-chatbot .chatbot-toggler{
-    transform: rotate(90deg);
-}
-.show-chatbot .chatbot-toggler span:first-child,
-.chatbot-toggler span:last-child{
-    opacity: 0;
-}
-.show-chatbot .chatbot-toggler span:last-child{
-    opacity: 1;
-}
-@media(max-width:490px){
-    .chatbot{
-        right: 0;
-        bottom: 0;
-        height: 100%;
-        width: 100%;
-        border-radius: 0;
-    }
-    .chatbot .chatbox{
-        height: 90%;
-    }
-} */
-  #favoriteBtn{
-    background: #4CC082;
-    font-size: 20px;
-    padding: 10px 25px;
-    border : none;
-    border-radius: 5px;
-    margin-top: 20px;
-    margin-left: 20px;
-  }
-</style> 
-    <section id="courses" class="padding-medium" style = "margin-top:-50px;">
-        <div class="container">
-            <div class="row">  
-            <h3 style = "margin-bottom: 20px; algin-items: center">Tài liệu liên quan</h3>
+          </div>
+            
+        <div class="related-document" style = "margin-left: 15px; width: 600px">
+            <h3>Tài liệu liên quan</h3>
+            <div class = "rowrelated" style = "display:flex; flex-wrap:wrap">
            <?php require ('ketnoi/connect.php');
                   $sql_str = "SELECT *
                               FROM (
@@ -233,11 +65,11 @@ $is_favorite = $favorite_result->num_rows > 0;
                                       AND id != $tlid
                                   )
                               ) AS combined
-                              LIMIT 8";
+                              LIMIT 6";
                   $result = mysqli_query($conn,$sql_str);
                   while($row = mysqli_fetch_assoc($result)){ 
               ?>
-              <div class="col-sm-6 col-lg-4 col-xl-3 mb-5" >
+              <div class="col-sm-6 col-lg-4 col-xl-3 mb-5" style = "width: 250px; margin-right: 20px;margin-left: 20px">
                 <div class="z-1 position-absolute m-4">
                   <!-- <span class="badge text-white bg-secondary" >PDF</span> -->
                 </div>
@@ -277,16 +109,33 @@ $is_favorite = $favorite_result->num_rows > 0;
               <?php } ?>
             </div>
         </div>
-    </section>
-    <!-- <button class="chatbot-toggler">
+    </div>
+    <button class="chatbot-toggler">
         <span class="material-symbols-outlined">
             mode_comment
             </span>
         <span class="material-symbols-outlined">
             close
             </span>
-    </button> -->
-   
+    </button>
+    <div class="chatbot">
+        <header>
+            <h2>Chat bot</h2>
+        </header>
+        <ul class = "chatbox">
+            <li class = "chat incoming">
+                <span class="material-symbols-outlined">
+                    smart_toy
+                    </span>
+                <p>xin chào  <br>Tôi có thể giúp gì cho bạn? </p>
+            </li>
+            
+        </ul>
+        <div class="chat-input">
+            <textarea placeholder="Nhập câu hỏi..." required></textarea>
+            <span id="send-btn" class="material-symbols-outlined">send</span>
+        </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
@@ -320,7 +169,7 @@ $(document).ready(function() {
 const chatInput = document.querySelector(".chat-input textarea")
 const sendBtn = document.querySelector(".chat-input span")
 const chatBox = document.querySelector(".chatbox")
-// const chatbotToggler = document.querySelector(".chatbot-toggler")
+const chatbotToggler = document.querySelector(".chatbot-toggler")
 
 let userMessage;
 const API_KEY = "pk-OzUBuOseTTzNmIfCqGvfbFoRsJhSbXeBFuyyVYJRLbMWCKIR";
@@ -382,12 +231,163 @@ chatInput.addEventListener("input",() => {
     chatInput.style.height = `${chatInput.scrollHeight}px`;
 })
 chatInput.addEventListener("keydown",(e) => {
-    if(e.key === "Enter" && !e.shiftKey){
+    if(e.key === "Enter"){
         e.preventDefault();
         handleChat();
     }
 })
-// chatbotToggler.addEventListener("click",() => document.body.classList.toggle("show-chatbot"));
+chatbotToggler.addEventListener("click",() => document.body.classList.toggle("show-chatbot"));
 sendBtn.addEventListener("click",handleChat)
 </script>  
+<style>
+  .chatbot header{
+    background: #724ae8;
+    padding: 16px 0 ;
+    text-align: center;
+    border-radius: 15px 15px 0 0 ;
+}
+.chatbot header h2{
+    color: #fff;
+    font-size: 1.4rem;
+}
+.chatbot .chatbox{
+    
+    height: 350px;
+    overflow-y: auto;
+    padding: 15px 20px 100px;
+}
+.chatbot .chat{
+    display: flex;
+}
+.chatbot .incoming span{
+    height: 25px;
+    width: 25px;
+    color: #fff;
+    align-items: flex-end;
+    background: #724ae8;
+    text-align: center;
+    line-height: 25px;
+    border-radius: 4px;
+    margin: 0 10px 7px 0;
+}
+.chatbot .outcoming{
+    justify-content: flex-end;
+    margin: 20px 0;
+}
+.chatbot .chat p{
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 10px 10px 0 10px;
+    white-space: pre-wrap;
+    background: #724ae8;
+    font-size: 14px;
+}
+.chatbot .incoming p{
+ color: #000;
+ background: #f2f2f2;
+ border-radius: 0 10px 10px 10px;
+}
+.chatbot .chat-input{
+    position: absolute;
+    bottom: 0;
+    gap: 5px;
+    width: 100%;
+    display: flex;
+    background: #fff;
+    padding: 5px 20px;
+    border-top: 1px solid #ccc;
+}
+.chat-input textarea{
+    border: none;
+    outline: none;
+    font-size: 16px;
+    width: 100%;    
+    resize: none;
+    padding: 15px 16px 15px 0;
+}
+.chat-input span{
+    align-self:flex-end;
+    height: 30px;
+    line-height: px;
+    color: #724ae8;
+    font-size: 1.35rem;
+    cursor: pointer;
+    margin-bottom: 30px;
+    visibility: hidden;
+}
+.chat-input textarea:valid ~ span{
+    visibility: visible;
+}
+.chatbot{
+    position: fixed;
+    background: white;
+    width: 350px;
+    right: 40px;
+    transform: scale(0.5);
+    opacity: 0;
+    pointer-events: none;
+    overflow: hidden;
+    bottom: 90px;
+    transform-origin: bottom right;
+    border-radius: 15px;
+    box-shadow: 0 0 128px rgba(0,0,0,0.1), 0 32px 64px -48px rgba(0,0,0,0.5);
+    transition: all 0.1s ease;
+}
+.show-chatbot .chatbot{
+    transform: scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+.chatbot-toggler{
+    position: fixed;
+    right: 40px;
+    bottom: 30px;
+    height: 50px;
+    width: 50px;
+    color: #fff;
+    border: none;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: #724ae8;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+.chatbot-toggler span{
+    position: absolute;
+}
+.show-chatbot .chatbot-toggler{
+    transform: rotate(90deg);
+}
+.show-chatbot .chatbot-toggler span:first-child,
+.chatbot-toggler span:last-child{
+    opacity: 0;
+}
+.show-chatbot .chatbot-toggler span:last-child{
+    opacity: 1;
+}
+@media(max-width:490px){
+    .chatbot{
+        right: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+        border-radius: 0;
+    }
+    .chatbot .chatbox{
+        height: 90%;
+    }
+}
+  #favoriteBtn{
+    background: #4CC082;
+    font-size: 20px;
+    padding: 10px 25px;
+    border : none;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-left: 20px;
+  }
+</style> 
 <?php require("thanhphan/footer.php")?>

@@ -3,87 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>ResetPassword</title>
 	<link href="https://fonts.googleapis.com/css2?family=Moderustic:wght@300..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 </head>
 <body>
 <?php
 session_start();
+require('ketnoi/connect.php');
 $errorMsg = "";
-$username = "";
-$email = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["signup"])) {
-    // Lấy dữ liệu từ form
-    $username = trim($_POST["username"]);
-    $email = trim($_POST["email"]);
-    $password = $_POST["password"];
-    $cfpassword = $_POST["confirmpassword"];
+// Kiểm tra nếu người dùng đã xác thực OTP
+if (!isset($_SESSION['taikhoan'])) {
+    header('Location: forgotpassword.php'); // Quay lại bước đầu nếu chưa xác thực
+    exit();
+}
 
-    // Kiểm tra dữ liệu
-    if ($password !== $cfpassword) {
-        $errorMsg = "Mật khẩu không trùng khớp!";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errorMsg = "Email không hợp lệ!";
+// Xử lý khi form đổi mật khẩu gửi dữ liệu
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $new_password = $_POST['new_password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    if ($new_password != $confirm_password) {
+        $errorMsg = "Mật khẩu xác nhận không khớp!";
     } else {
-        require_once("ketnoi/connect.php");
+        // Mã hóa mật khẩu và cập nhật vào database
+        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
+        $taikhoan = $_SESSION['taikhoan'];
 
-        // Kiểm tra email hoặc tên người dùng đã tồn tại
-        $stmt = $conn->prepare("SELECT * FROM user WHERE taikhoan = ? OR ten = ?");
-        $stmt->bind_param("ss", $email, $username);
+        $stmt = $conn->prepare("UPDATE user SET matkhau = ? WHERE taikhoan = ?");
+        $stmt->bind_param("ss", $hashed_password, $taikhoan);
         $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $errorMsg = "Email hoặc Tên người dùng đã tồn tại!";
-        } else {
-            // Mã hóa mật khẩu và thêm vào CSDL
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO user VALUE (NULL, ?, ?, ?, 'images/avatar.svg')");
-            $stmt->bind_param("sss", $username, $email, $hashedPassword);
-            if ($stmt->execute()) {
-                //  echo "Đăng ký thành công! <a href='loginform.php'>Đăng nhập</a>";
-                // exit;
-            // } else {
-            //     $errorMsg = "Đăng ký thất bại: " . $stmt->error;
-            header("Location: loginform.php");
-            }
-        }
+
+        // Xóa session và thông báo thành công
+        unset($_SESSION['otp']);
+        unset($_SESSION['taikhoan']);
+        echo "<script>
+                alert('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+                window.location.href = 'loginform.php';
+              </script>";
+        exit();
     }
 }
 ?>
-
     <div class="container">
         <form action="" method = "Post">
-            <h1>Sign Up</h1>
-            <div class="formcontrol" >
-                <input id="username" type="text" placeholder="Username" name = "username"
-                value="<?php echo htmlspecialchars($username); ?>" required>
-                <small></small>
-                <span></span>
-            </div>
+            <h1>Reset Password</h1>
             <div class="formcontrol ">
-                <input id= "Email" type="text" placeholder="Email" name  = "email"
-                value="<?php echo htmlspecialchars($email); ?>" required>
-                <small></small>
-                <span></span>
-            </div>
-            <div class="formcontrol ">
-                <input id="Password" type="text" placeholder="Password" name = "password" required>
+                <input id="Password" type="password" placeholder="Password" name = "new_password" required>
                 <small></small>
                 <span></span>
             </div>
             <div class="formcontrol">
-                <input id="Confirm" type="text" placeholder="Confirm Password" name = "confirmpassword" required>
+                <input id="Confirm" type="password" placeholder="Confirm Password" name = "confirm_password" required>
                 <small></small>
                 <span></span>
             </div>
             <div class="error">
             <?php echo !empty($errorMsg) ? htmlspecialchars($errorMsg) : ''; ?>
             </div>
-            <button type="submit" class="btnLogin" name = "signup">Sign up</button>
-            <div class="signuplink">
-                You have a account?  <a href="loginform.php">Login</a>
-            </div>
+            <button type="submit" class="btnLogin" name = "signup">Verify</button>
         </form>
     </div>
 </body>

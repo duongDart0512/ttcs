@@ -9,7 +9,7 @@ $user_id = $_SESSION['userid'];
 // Bật hiện thị lỗi để debug
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
+$errMsg = "";
 // Kiểm tra ImageMagick
 if (!extension_loaded('imagick')) {
     error_log('ImageMagick không được cài đặt');
@@ -92,8 +92,9 @@ if (isset($_FILES['pdf_file'])) {
 
     $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
     if ($fileExtension != "pdf") {
-        error_log("File không phải PDF");
-        die("Chỉ chấp nhận file PDF.");
+        // error_log("File không phải PDF");
+        // die("Chỉ chấp nhận file PDF.");
+        $errMsg = "Chỉ chấp nhận file pdf";
     }
 
     
@@ -128,8 +129,11 @@ if (isset($_FILES['pdf_file'])) {
     mysqli_query($conn,$sqlupdate1);
     $sqlupdate2 = "UPDATE tailieu 
     SET filepath = REPLACE(filepath, '/ttcs', '');"   ; 
-mysqli_query($conn,$sqlupdate2);
+    mysqli_query($conn,$sqlupdate2);
     // Trở về trang 
-    header("Location: upload.php");
+    echo "<script>
+                        alert('Tải tài liệu thành công!');
+                        window.location.href = 'upload.php';
+                      </script>";
 }
 ?>
