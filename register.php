@@ -9,83 +9,185 @@
 <body>
 <?php
 session_start();
+require 'src/Exception.php';
+require 'src/PHPMailer.php';
+require 'src/SMTP.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 $errorMsg = "";
-$username = "";
 $email = "";
+$otp = "";
+if (!isset($_POST['sendotp']) && !isset($_POST['verifyotp']) && !isset($_POST['signup'])) {
+    unset($_SESSION['otp']);
+    unset($_SESSION['otp_verified']);
+    unset($_SESSION['email']);
+}
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if (isset($_POST["sendotp"])) {
+        // Xử lý gửi OTP
+        $email = trim($_POST["email"]);
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["signup"])) {
-    // Lấy dữ liệu từ form
-    $username = trim($_POST["username"]);
-    $email = trim($_POST["email"]);
-    $password = $_POST["password"];
-    $cfpassword = $_POST["confirmpassword"];
-
-    // Kiểm tra dữ liệu
-    if ($password !== $cfpassword) {
-        $errorMsg = "Mật khẩu không trùng khớp!";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $errorMsg = "Email không hợp lệ!";
-    } else {
-        require_once("ketnoi/connect.php");
-
-        // Kiểm tra email hoặc tên người dùng đã tồn tại
-        $stmt = $conn->prepare("SELECT * FROM user WHERE taikhoan = ? OR ten = ?");
-        $stmt->bind_param("ss", $email, $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            $errorMsg = "Email hoặc Tên người dùng đã tồn tại!";
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errorMsg = "Email không hợp lệ!";
         } else {
-            // Mã hóa mật khẩu và thêm vào CSDL
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $conn->prepare("INSERT INTO user VALUE (NULL, ?, ?, ?, 'images/avatar.svg')");
-            $stmt->bind_param("sss", $username, $email, $hashedPassword);
-            if ($stmt->execute()) {
-                //  echo "Đăng ký thành công! <a href='loginform.php'>Đăng nhập</a>";
-                // exit;
-            // } else {
-            //     $errorMsg = "Đăng ký thất bại: " . $stmt->error;
-            header("Location: loginform.php");
+            // Kiểm tra email đã tồn tại chưa
+            require_once("ketnoi/connect.php");
+            $stmt = $conn->prepare("SELECT * FROM user WHERE taikhoan = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $errorMsg = "Email đã được sử dụng. Vui lòng chọn email khác!";
+            } else {
+                // Tạo mã OTP và lưu vào session
+                $otp = sprintf("%06d", mt_rand(1, 999999));
+                $_SESSION['otp'] = $otp;
+                $_SESSION['email'] = $email;
+
+                // Gửi OTP qua email bằng PHPMailer
+                $mail = new PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com'; 
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'mocbltk@gmail.com'; 
+                    $mail->Password = 'txko tluk lact ogjh'; 
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port = 587;
+
+                    $mail->setFrom('mocbltk@gmail.com', 'Education Platform');
+                    $mail->addAddress($email);
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Mã xác thực đăng ký tài khoản';
+                    $mail->Body = "
+                        <html>
+                        <body>
+                            <h2>Mã xác thực đăng ký tài khoản</h2>
+                            <p>Mã OTP của bạn là: <strong>{$otp}</strong></p>
+                            <p>Mã này sẽ hết hạn trong 5 phút.</p>
+                        </body>
+                        </html>
+                    ";
+
+                    $mail->send();
+                    $errorMsg = "Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.";
+                } catch (Exception $e) {
+                    $errorMsg = "Không thể gửi email. Lỗi: {$mail->ErrorInfo}";
+                }
+            }
+        }
+    } elseif (isset($_POST["verifyotp"])) {
+        // Xác minh OTP
+        $enteredOtp = trim($_POST["otp"]);
+        
+        // Kiểm tra OTP
+        if ($enteredOtp === $_SESSION['otp']) {
+            // Đánh dấu OTP đã xác thực
+            $_SESSION['otp_verified'] = true;
+            $errorMsg = "Xác thực OTP thành công!";
+        } else {
+            $errorMsg = "Mã OTP không chính xác. Vui lòng thử lại!";
+        }
+    } elseif (isset($_POST["signup"]) && isset($_SESSION['otp_verified']) && $_SESSION['otp_verified']) {
+        // Đăng ký tài khoản sau khi OTP đã được xác minh
+        $username = trim($_POST["username"]);
+        $password = $_POST["password"];
+        $cfpassword = $_POST["confirmpassword"];
+
+        // Kiểm tra mật khẩu
+        if (strlen($password) < 6) {
+            $errorMsg = "Mật khẩu phải có ít nhất 6 ký tự!";
+        } elseif ($password !== $cfpassword) {
+            $errorMsg = "Mật khẩu không trùng khớp!";
+        } else {
+            require_once("ketnoi/connect.php");
+            $email = $_SESSION['email'];
+
+            // Kiểm tra tên người dùng đã tồn tại chưa
+            $stmt = $conn->prepare("SELECT * FROM user WHERE ten = ?");
+            $stmt->bind_param("s", $username);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows > 0) {
+                $errorMsg = "Tên người dùng đã tồn tại!";
+            } else {
+                // Mã hóa mật khẩu
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                
+                // Thêm người dùng mới
+                $stmt = $conn->prepare("INSERT INTO user (ten, taikhoan, matkhau, anhdaidien) VALUES (?, ?, ?, 'images/avatar.svg')");
+                $stmt->bind_param("sss", $username, $email, $hashedPassword);
+                
+                if ($stmt->execute()) {
+                    // Xóa session sau khi đăng ký thành công
+                    unset($_SESSION['otp']);
+                    unset($_SESSION['otp_verified']);
+                    unset($_SESSION['email']);
+                    
+                    // Chuyển đến trang đăng nhập
+                    header("Location: loginform.php");
+                    exit;
+                } else {
+                    $errorMsg = "Đăng ký thất bại: " . $stmt->error;
+                }
             }
         }
     }
 }
 ?>
 
-    <div class="container">
-        <form action="" method = "Post">
-            <h1>Sign Up</h1>
-            <div class="formcontrol" >
-                <input id="username" type="text" placeholder="Username" name = "username"
-                value="<?php echo htmlspecialchars($username); ?>" required>
-                <small></small>
-                <span></span>
+<div class="container">
+    <form action="" method="POST" autocomplete="off">
+        <h1>Đăng Ký Tài Khoản</h1>
+
+        <?php 
+        // Điều kiện quan trọng: chỉ hiển thị OTP khi đã có session OTP
+        if (!isset($_SESSION['otp'])): 
+        ?>
+            <!-- Bước 1: Nhập Email -->
+            <div class="formcontrol">
+                <input id="Email" type="email" placeholder="Nhập Email" name="email" 
+                       value="<?php echo htmlspecialchars($email); ?>" autocomplete="off" required>
             </div>
-            <div class="formcontrol ">
-                <input id= "Email" type="text" placeholder="Email" name  = "email"
-                value="<?php echo htmlspecialchars($email); ?>" required>
-                <small></small>
-                <span></span>
+            
+            <button type="submit" class="btnLogin" name="sendotp">Gửi Mã OTP</button>
+
+        <?php elseif (!isset($_SESSION['otp_verified'])): ?>
+            <!-- Bước 2: Nhập OTP -->
+            <div class="formcontrol">
+                <input id="OTP" type="text" placeholder="Nhập mã OTP" name="otp" autocomplete="off" required>
             </div>
-            <div class="formcontrol ">
-                <input id="Password" type="text" placeholder="Password" name = "password" required>
-                <small></small>
-                <span></span>
+            <button type="submit" class="btnLogin" name="verifyotp">Xác Thực OTP</button>
+
+        <?php else: ?>
+            <!-- Bước 3: Nhập thông tin tài khoản -->
+            <div class="formcontrol">
+                <input id="username" type="text" placeholder="Tên người dùng" name="username" autocomplete="new-username" required>
             </div>
             <div class="formcontrol">
-                <input id="Confirm" type="text" placeholder="Confirm Password" name = "confirmpassword" required>
-                <small></small>
-                <span></span>
+                <input id="Password" type="password" placeholder="Mật khẩu" name="password" 
+                autocomplete="new-password" required>
             </div>
-            <div class="error">
+            <div class="formcontrol">
+                <input id="Confirm" type="password" placeholder="Xác nhận mật khẩu" name="confirmpassword" required>
+            </div>
+            <button type="submit" class="btnLogin" name="signup">Đăng Ký</button>
+
+        <?php endif; ?>
+
+        <div class="error">
             <?php echo !empty($errorMsg) ? htmlspecialchars($errorMsg) : ''; ?>
-            </div>
-            <button type="submit" class="btnLogin" name = "signup">Sign up</button>
-            <div class="signuplink">
-                You have a account?  <a href="loginform.php">Login</a>
-            </div>
-        </form>
-    </div>
+        </div>
+        <div class="signuplink">
+            Đã có tài khoản? <a href="loginform.php">Đăng Nhập</a>
+        </div>
+    </form>
+</div>
 </body>
 <style>
 

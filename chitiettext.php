@@ -16,6 +16,7 @@ $stmt->execute();
 $favorite_result = $stmt->get_result();
 $is_favorite = $favorite_result->num_rows > 0;
 ?>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <div class= "bgtext" style = " margin-top:10px;height : 100px;max-width : 100vw; background: #4CC082; 
     display: flex; align-items: center; justify-content: center">
       <!-- <img src="images/bgtext.jpg" alt="" style = "height : 150px; width : 100vw" > -->
@@ -48,6 +49,152 @@ $is_favorite = $favorite_result->num_rows > 0;
             </div>
         </div>  
     </div>
+    <script>
+$(document).ready(function() {
+    $('#favoriteBtn').click(function() {
+        $.ajax({
+            url: 'btnyeuthich.php',
+            method: 'POST',
+            data: {
+                tlid: <?= $tlid; ?>
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'added') {
+                    $('#favoriteBtn')
+                        .addClass('favorited')
+                        .text('Đã Yêu Thích');
+                } else if (response.status === 'removed') {
+                    $('#favoriteBtn')
+                        .removeClass('favorited')
+                        .text('Yêu Thích');
+                }
+                alert(response.message);
+            },
+            error: function() {
+                alert('Có lỗi xảy ra');
+            }
+        });
+    });
+});
+// chatbot
+let pdfContent = ""; 
+const chatInput = document.querySelector(".chat-input textarea")
+const sendBtn = document.querySelector(".chat-input span")
+const chatBox = document.querySelector(".chatbox")
+const pdfViewer = document.querySelector(".pdffile");
+console.log("PDF Viewer src:", pdfViewer.src);
+// const chatbotToggler = document.querySelector(".chatbot-toggler")
+
+let userMessage;
+const API_KEY = "pk-OzUBuOseTTzNmIfCqGvfbFoRsJhSbXeBFuyyVYJRLbMWCKIR";
+const InputInitheight = chatInput.scrollHeight;
+// extract PDF
+async function extractPDFContent() {
+    try {
+        const pdfUrl = pdfViewer.src;
+        const response = await fetch(pdfUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // Using pdf.js to extract text
+        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+        let text = "";
+        
+        console.log("Total pages:", pdf.numPages); // Kiểm tra số trang
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+            console.log(`Extracting page ${i}`); // Kiểm tra tiến trình đọc từng trang
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            text += textContent.items.map(item => item.str).join(" ");
+        }
+        console.log("Extracted text sample:", text.substring(0, 200)); // Hiển thị một phần nội dung đã trích xuất
+        pdfContent = text;
+        console.log("PDF content extracted successfully");
+    } catch (error) {
+        console.error("Error extracting PDF content:", error);
+    }
+}
+//
+const createChatLi = (message, className) => {
+    const chatLi = document.createElement("li")
+    chatLi.classList.add("chat", className )
+    let contentChat = className === "outcoming" ? `<p></p>` : `<span class="material-symbols-outlined">
+                    smart_toy
+                    </span><p></p>`;
+    chatLi.innerHTML = contentChat;
+    chatLi.querySelector("p").textContent = message;
+    return chatLi;
+}
+const generateResponse = (incomingChatLi) =>{
+    const API_URL = "https://api.openai.com/v1/chat/completions";
+    const messageElement = incomingChatLi.querySelector("p");
+    const contextPrompt = `Context from PDF document: ${pdfContent}\n\nUser question: ${userMessage}\n\nPlease provide an answer based on the PDF content above.`;
+    
+    const requestOptions = {
+        method : "POST",
+        headers :{
+            "Content-Type" : "application/json",
+            "Authorization" : `Bearer ${API_KEY}`
+        },
+        body : JSON.stringify({
+           model: "gpt-3.5-turbo",
+        messages: [
+        {
+            role: "user",
+            content : userMessage
+        }]
+        })
+    }
+    fetch(API_URL,requestOptions).then(res => res.json()).then(data => {
+        messageElement.textContent = data.choices[0].message.content;
+    }).catch((error) => {
+        messageElement.textContent = "Xin loi.. Da xay ra loi.Vui long thu lai";
+    }).finally(()=> chatBox.scroll(0,chatBox.scrollHeight));
+        
+    
+}
+const handleChat = () =>{
+    userMessage = chatInput.value.trim();
+    if(!userMessage)    return;
+
+    chatInput.value = "";
+
+    chatBox.appendChild(createChatLi(userMessage,"outcoming"));
+    chatBox.scroll(0,chatBox.scrollHeight);
+    
+    setTimeout(() => {
+        const incomingChatLi = createChatLi("Vui long doi...","incoming")
+        chatBox.appendChild(incomingChatLi);
+        chatBox.scroll(0,chatBox.scrollHeight);
+        generateResponse(incomingChatLi);
+    },600)
+}
+chatInput.addEventListener("input",() => {
+    chatInput.style.height = `${InputInitheight}px`;
+    chatInput.style.height = `${chatInput.scrollHeight}px`;
+})
+chatInput.addEventListener("keydown",(e) => {
+    if(e.key === "Enter" && !e.shiftKey){
+        e.preventDefault();
+        handleChat();
+    }
+})
+// chatbotToggler.addEventListener("click",() => document.body.classList.toggle("show-chatbot"));
+sendBtn.addEventListener("click",handleChat);
+document.addEventListener("DOMContentLoaded", () => {
+    // Load PDF.js library
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js';
+    document.head.appendChild(script);
+    
+    script.onload = () => {
+        console.log("PDF.js library loaded");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        extractPDFContent();
+    };
+});
+</script>  
 <style>
 .chatbot{
     position: relative;
@@ -131,7 +278,7 @@ $is_favorite = $favorite_result->num_rows > 0;
     align-self:flex-end;
     height: 30px;
     line-height: px;
-    color: #724ae8;
+    color: #4CC082;
     font-size: 1.35rem;
     cursor: pointer;
     margin-bottom: 30px;
@@ -278,116 +425,7 @@ $is_favorite = $favorite_result->num_rows > 0;
             </div>
         </div>
     </section>
-    <!-- <button class="chatbot-toggler">
-        <span class="material-symbols-outlined">
-            mode_comment
-            </span>
-        <span class="material-symbols-outlined">
-            close
-            </span>
-    </button> -->
    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-    $('#favoriteBtn').click(function() {
-        $.ajax({
-            url: 'btnyeuthich.php',
-            method: 'POST',
-            data: {
-                tlid: <?= $tlid; ?>
-            },
-            dataType: 'json',
-            success: function(response) {
-                if (response.status === 'added') {
-                    $('#favoriteBtn')
-                        .addClass('favorited')
-                        .text('Đã Yêu Thích');
-                } else if (response.status === 'removed') {
-                    $('#favoriteBtn')
-                        .removeClass('favorited')
-                        .text('Yêu Thích');
-                }
-                alert(response.message);
-            },
-            error: function() {
-                alert('Có lỗi xảy ra');
-            }
-        });
-    });
-});
-// chatbot
-const chatInput = document.querySelector(".chat-input textarea")
-const sendBtn = document.querySelector(".chat-input span")
-const chatBox = document.querySelector(".chatbox")
-// const chatbotToggler = document.querySelector(".chatbot-toggler")
 
-let userMessage;
-const API_KEY = "pk-OzUBuOseTTzNmIfCqGvfbFoRsJhSbXeBFuyyVYJRLbMWCKIR";
-const InputInitheight = chatInput.scrollHeight;
-const createChatLi = (message, className) => {
-    const chatLi = document.createElement("li")
-    chatLi.classList.add("chat", className )
-    let contentChat = className === "outcoming" ? `<p></p>` : `<span class="material-symbols-outlined">
-                    smart_toy
-                    </span><p></p>`;
-    chatLi.innerHTML = contentChat;
-    chatLi.querySelector("p").textContent = message;
-    return chatLi;
-}
-const generateResponse = (incomingChatLi) =>{
-    const API_URL = "https://api.openai.com/v1/chat/completions";
-    const messageElement = incomingChatLi.querySelector("p");
-    const requestOptions = {
-        method : "POST",
-        headers :{
-            "Content-Type" : "application/json",
-            "Authorization" : `Bearer ${API_KEY}`
-        },
-        body : JSON.stringify({
-           model: "gpt-3.5-turbo",
-        messages: [
-        {
-            role: "user",
-            content : userMessage
-        }]
-        })
-    }
-    fetch(API_URL,requestOptions).then(res => res.json()).then(data => {
-        messageElement.textContent = data.choices[0].message.content;
-    }).catch((error) => {
-        messageElement.textContent = "Xin loi.. Da xay ra loi.Vui long thu lai";
-    }).finally(()=> chatBox.scroll(0,chatBox.scrollHeight));
-        
-    
-}
-const handleChat = () =>{
-    userMessage = chatInput.value.trim();
-    if(!userMessage)    return;
-
-    chatInput.value = "";
-
-    chatBox.appendChild(createChatLi(userMessage,"outcoming"));
-    chatBox.scroll(0,chatBox.scrollHeight);
-    
-    setTimeout(() => {
-        const incomingChatLi = createChatLi("Vui long doi...","incoming")
-        chatBox.appendChild(incomingChatLi);
-        chatBox.scroll(0,chatBox.scrollHeight);
-        generateResponse(incomingChatLi);
-    },600)
-}
-chatInput.addEventListener("input",() => {
-    chatInput.style.height = `${InputInitheight}px`;
-    chatInput.style.height = `${chatInput.scrollHeight}px`;
-})
-chatInput.addEventListener("keydown",(e) => {
-    if(e.key === "Enter" && !e.shiftKey){
-        e.preventDefault();
-        handleChat();
-    }
-})
-// chatbotToggler.addEventListener("click",() => document.body.classList.toggle("show-chatbot"));
-sendBtn.addEventListener("click",handleChat)
-</script>  
 <?php require("thanhphan/footer.php")?>
