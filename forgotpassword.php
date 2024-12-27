@@ -40,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt = $conn->prepare("UPDATE user SET otp = ?, otp_created_at = NOW() WHERE taikhoan = ?");
         $stmt->bind_param("ss", $otp, $user_email);
         $stmt->execute();
-
         // Bước 3: Gửi OTP qua email
 
         $mail = new PHPMailer(true);

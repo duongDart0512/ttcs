@@ -1,17 +1,20 @@
 <?php session_start();
 require('ketnoi/connect.php');
-if (!isset($_SESSION['userid']) && 
-    !in_array(basename($_SERVER['PHP_SELF']), ['loginform.php', 'register.php'])) {
+if (
+  !isset($_SESSION['userid']) &&
+  !in_array(basename($_SERVER['PHP_SELF']), ['loginform.php', 'register.php'])
+) {
   header("Location: loginform.php");
   exit;
-    }
-    function getUserInfo($conn, $user_id) {
-      $stmt = $conn->prepare("SELECT ten, taikhoan, anhdaidien FROM user WHERE userid = ?");
-      $stmt->bind_param("i", $user_id);
-      $stmt->execute();
-      $result = $stmt->get_result();
-      return $result->fetch_assoc();
-  }
+}
+function getUserInfo($conn, $user_id)
+{
+  $stmt = $conn->prepare("SELECT ten, taikhoan, anhdaidien FROM user WHERE userid = ?");
+  $stmt->bind_param("i", $user_id);
+  $stmt->execute();
+  $result = $stmt->get_result();
+  return $result->fetch_assoc();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -62,8 +65,8 @@ if (!isset($_SESSION['userid']) &&
         </h4>
         <div class="search-bar border rounded-2 border-dark-subtle">
           <form id="search-form" class="text-center d-flex align-items-center" action="timkiem.php" method="get">
-            <input type="text" class="form-control border-0 bg-transparent" placeholder="Search Here" name = "keyword"/>
-            <button method = "post"class="fs-4 me-3" style="background: none; border: none;">
+            <input type="text" class="form-control border-0 bg-transparent" placeholder="Search Here" name="keyword" />
+            <button method="post" class="fs-4 me-3" style="background: none; border: none;">
               <i class="fa-solid fa-magnifying-glass"></i>
             </button>
           </form>
@@ -99,7 +102,7 @@ if (!isset($_SESSION['userid']) &&
 
           <ul class="navbar-nav menu-list list-unstyled align-items-lg-center d-flex gap-md-3 mb-0">
             <li class="nav-item">
-              <a href="index.php" class="nav-link ">Trang chủ</a> 
+              <a href="index.php" class="nav-link ">Trang chủ</a>
               <!-- mx-2 active -->
             </li>
 
@@ -107,18 +110,18 @@ if (!isset($_SESSION['userid']) &&
               <a class="nav-link mx-2 dropdown-toggle align-items-center" role="button" id="pages"
                 data-bs-toggle="dropdown" aria-expanded="false">Năm học</a>
               <ul class="dropdown-menu" aria-labelledby="pages">
-              <?php 
-                            $sql_str = "select * from namhoc order by ten";
-                            $result = mysqli_query($conn,$sql_str);
-                            while($row = mysqli_fetch_assoc($result)){ 
-                            ?>
-                <li><a href="tailieunamhhoc.php?id=<?=$row['id']?>" class="dropdown-item"><?=$row['ten']?></a></li>
-                <?php }?>
+                <?php
+                $sql_str = "select * from namhoc order by ten";
+                $result = mysqli_query($conn, $sql_str);
+                while ($row = mysqli_fetch_assoc($result)) {
+                ?>
+                  <li><a href="tailieunamhhoc.php?id=<?= $row['id'] ?>" class="dropdown-item"><?= $row['ten'] ?></a></li>
+                <?php } ?>
               </ul>
             </li>
 
             <li class="nav-item">
-              <a href="meetingroom.php" class="nav-link ">Meeting Room</a>
+              <a href="index.html" class="nav-link ">Meeting Room</a>
             </li>
 
             <li class="nav-item">
@@ -129,12 +132,12 @@ if (!isset($_SESSION['userid']) &&
                 class="nav-link mx-2 text-decoration-underline" target="_blank">GET PRO</a>
             </li>
           </ul> -->
-            <?php 
-            
+            <?php
+
             ?>
-          <?php
-          //if(!isset($_SESSION['userid'])):
-          ?>
+            <?php
+            //if(!isset($_SESSION['userid'])):
+            ?>
             <!-- <li class="nav-item">
               <a href="loginform.php" class="nav-link ">Đăng nhập</a>
             </li>
@@ -142,31 +145,33 @@ if (!isset($_SESSION['userid']) &&
             <li class="nav-item">
               <a href="register.php" class="nav-link mx-2">Đăng ký</a>
             </li> -->
-          <?php if (isset($_SESSION['userid'])):
-          $userInfo = getUserInfo($conn,$_SESSION['userid'])?>
-          <!-- <div class="d-none d-lg-flex align-items-center">
+            <?php if (isset($_SESSION['userid'])):
+              $userInfo = getUserInfo($conn, $_SESSION['userid']) ?>
+              <!-- <div class="d-none d-lg-flex align-items-center">
             <ul class="d-flex  align-items-center list-unstyled m-0"> -->
-              <li class = "nav-item dropdown">
-              <a class="nav-link mx-2 align-items-center" role="button" id="pages"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="<?php echo htmlspecialchars($userInfo['anhdaidien']); ?>" 
-              alt="User Avatar" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;"> </a>
-                  <ul class = "dropdown-menu" aria-labelledby="pages">
-                    <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
-                      <a href = "account.php">Thông tin tài khoản</a></li>
-                    <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
-                      <a href = "upload.php">Tải tài liệu lên</a>
-                    </li>
-                    <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
-                      <a href = "changepassword.php">Đổi mật khẩu</a>
-                    </li>
-                    <li class="dropdown-item" style = "font-size : 10px; cursor: pointer;">
-                      <a href = "logout.php">Đăng xuất</a></li>
-                  </ul>
+              <li class="nav-item dropdown">
+                <a class="nav-link mx-2 align-items-center" role="button" id="pages"
+                  data-bs-toggle="dropdown" aria-expanded="false">
+                  <img src="<?php echo htmlspecialchars($userInfo['anhdaidien']); ?>"
+                    alt="User Avatar" class="rounded-circle" style="width: 30px; height: 30px; object-fit: cover;"> </a>
+                <ul class="dropdown-menu" aria-labelledby="pages">
+                  <li class="dropdown-item" style="font-size : 10px; cursor: pointer;">
+                    <a href="account.php">Thông tin tài khoản</a>
+                  </li>
+                  <li class="dropdown-item" style="font-size : 10px; cursor: pointer;">
+                    <a href="upload.php">Tải tài liệu lên</a>
+                  </li>
+                  <li class="dropdown-item" style="font-size : 10px; cursor: pointer;">
+                    <a href="changepassword.php">Đổi mật khẩu</a>
+                  </li>
+                  <li class="dropdown-item" style="font-size : 10px; cursor: pointer;">
+                    <a href="logout.php">Đăng xuất</a>
+                  </li>
+                </ul>
               </li>
               <li>
                 <a href="wishlist.php" class="ms-3">
-                  <i class="fa-regular fa-heart" ></i>  </a>
+                  <i class="fa-regular fa-heart"></i> </a>
                 </a>
               </li>
 
@@ -177,18 +182,19 @@ if (!isset($_SESSION['userid']) &&
                   </svg> </a>
                 </a>
               </li>
-              <?php else: ?>
-            <li class="nav-item">
-              <a href="loginform.php" class="nav-link">Đăng nhập</a>
-            </li>
+            <?php else: ?>
+              <li class="nav-item">
+                <a href="loginform.php" class="nav-link">Đăng nhập</a>
+              </li>
 
-            <li class="nav-item">
-              <a href="register.php" class="nav-link mx-2">Đăng ký</a>
-            </li>
+              <li class="nav-item">
+                <a href="register.php" class="nav-link mx-2">Đăng ký</a>
+              </li>
             <?php endif; ?>
             <!-- </ul>
           </div> -->
-          <?php //endif;?>
+            <?php //endif;
+            ?>
 
         </div>
       </div>
