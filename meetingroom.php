@@ -8,9 +8,13 @@
   <title>KMA Meet với Stringee API</title>
 
   <!-- Import Bulma CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css" />
   <!-- Font Awesome for Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
   <!-- Import JS Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/axios@0.20.0/dist/axios.min.js"></script>
@@ -63,9 +67,12 @@
     <div class="container has-text-centered">
       <!-- Header Section -->
       <h1 class="title">
-        Chào mừng đến với <span class="header-highlight">KMA Meet</span>
+        Chào mừng đến với
+        <span class="header-highlight">KMA Meeting Room</span>
       </h1>
-      <p class="subtitle">Kết nối dễ dàng với Stringee API</p>
+      <p class="subtitle">
+        Chúc bạn có khoảng thời gian học tập vui vẻ và hiệu quả!
+      </p>
 
       <!-- Buttons Section -->
       <div class="buttons-container">
@@ -89,12 +96,7 @@
           <span class="icon"><i class="fas fa-times-circle"></i></span>
           <span>Kết thúc cuộc họp</span>
         </button>
-        <button class="button is-warning is-medium" onclick="endRoom()">
-          <span class="icon"><i class="fas fa-times-circle"></i></span>
-          <span>Kết thúc dấđâsđasadads họp</span>
-        </button>
       </div>
-
       <!-- Info Section -->
     </div>
   </section>

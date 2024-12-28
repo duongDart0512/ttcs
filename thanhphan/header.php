@@ -121,7 +121,7 @@ function getUserInfo($conn, $user_id)
             </li>
 
             <li class="nav-item">
-              <a href="index.html" class="nav-link ">Meeting Room</a>
+              <a href="meetingroom.php" class="nav-link ">Meeting Room</a>
             </li>
 
             <li class="nav-item">
